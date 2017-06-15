@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup, Tag
 from selenium import webdriver
 from selenium.webdriver.support import ui
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchElementException
 
 from config import *
 
@@ -35,9 +36,30 @@ phantomjs_driver = phantomjs_driver_path
 
 opts = Options()
 opts.add_argument("user-agent={}".format(headers["User-Agent"]))
-# browser = webdriver.Chrome(chromedriver)
-browser = webdriver.PhantomJS(phantomjs_driver)
+browser = webdriver.Chrome(chromedriver)
+# browser = webdriver.PhantomJS(phantomjs_driver)
 wait = ui.WebDriverWait(browser, 5)
+
+
+class RetryException(Exception):
+    pass
+
+
+def retry(retry_times=0, exc_class=Exception, notice_message=None):
+    def wrapper(f):
+        @functools.wraps(f)
+        def inner_wrapper(*args, **kwargs):
+            current = 0
+            while True:
+                try:
+                    return f(*args, **kwargs)
+                except exc_class as e:
+                    if current >= retry_times:
+                        raise RetryException()
+                    print notice_message
+                    current += 1
+        return inner_wrapper
+    return wrapper
 
 
 def get_qq_target_playlist():
@@ -80,41 +102,18 @@ def search_song(playlist_id, song, singer):
     browser.get(search_url.format(url_sw))
     wait.until(lambda browser: browser.find_element_by_class_name("songlist__list"))
     sleep(1)
-    # execute two times
-    max_retry = 3
-    current = 0
-    while current < max_retry:
-        try:
-            browser.execute_script("document.getElementsByClassName('songlist__list')[0].firstElementChild.getElementsByClassName('list_menu__add')[0].click()")
-            # sleep(0.5)
-            # browser.execute_script("document.getElementsByClassName('songlist__list')[0].firstElementChild.getElementsByClassName('list_menu__add')[0].click()")
-            sleep(0.5)
 
-            # first_item = song_item[0]
-            # song_name = first_item.find_element_by_class_name("songlist__songname")
-            # add_panel = first_item.find_element_by_class_name("list_menu__add")
-            # y = add_panel.location['y'] - 90
-            # browser.execute_script('window.scrollTo(0, {0})'.format(y))
-            # sleep(10)
-            # action = ActionChains(browser)
-            # action.move_to_element(first_item)
-            # action.perform()
-            # sleep(1)
-            # add_panel.click()
-            # sleep(1)
-            # wait.until(lambda browser: browser.find_element_by_css_selector("a[data-dirid='5']"))
-            browser.find_element_by_css_selector("a[data-dirid='{}']".format(int(playlist_id))).click()
-        except Exception as e:
-            print "{} {}".format(song, current)
-            current += 1
-            # browser.execute_script("$('[data-dirid=201]').click()")
-        else:
-            return
+    @retry(retry_times=3)
+    def _add():
+        browser.execute_script("document.getElementsByClassName('songlist__list')[0].firstElementChild.getElementsByClassName('list_menu__add')[0].click()")
+        sleep(0.5)
+        browser.find_element_by_css_selector("a[data-dirid='{}']".format(playlist_id)).click()
+        return
 
 
+@retry(retry_times=3, exc_class=NoSuchElementException, notice_message='login failed and retry')
 def login_qq():
     browser.get("https://y.qq.com")
-
     wait.until(lambda browser: browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/span/a[2]"))
     browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/span/a[2]").click()
     wait.until(lambda browse: browser.find_element_by_id("frame_tips"))
@@ -130,14 +129,11 @@ def login_qq():
     submit.click()
     sleep(1)
     browser.switch_to.default_content()
+    browser.refresh()
+    wait.until(lambda browser: browser.find_element_by_class_name("popup_user"))
+    user_info = browser.find_element_by_class_name("popup_user")
+    user_info.find_element_by_css_selector("*")
     print "login sucess"
-
-
-def retry(func):
-    @functools.wraps(func)
-    def wrapper():
-        pass
-    return wrapper
 
 
 if __name__ == '__main__':

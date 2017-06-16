@@ -36,8 +36,8 @@ phantomjs_driver = phantomjs_driver_path
 
 opts = Options()
 opts.add_argument("user-agent={}".format(headers["User-Agent"]))
-browser = webdriver.Chrome(chromedriver)
-# browser = webdriver.PhantomJS(phantomjs_driver)
+# browser = webdriver.Chrome(chromedriver)
+browser = webdriver.PhantomJS(phantomjs_driver)
 wait = ui.WebDriverWait(browser, 5)
 
 

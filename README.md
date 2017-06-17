@@ -1,6 +1,13 @@
 # syncPlaylist
 Sync music.163 playlist to music.qq
 
+## platform
+1. Windows
+2. MacOS
+3. Linux(need to download phantomjs driver yourself)
+
+
+
 ---------------
 ## requirement
 1. beautifulsoup4
@@ -9,15 +16,18 @@ Sync music.163 playlist to music.qq
 
 ---------------
 ## Usage
-1. If you are Mac user, you can run `get_mac_phantomjs.sh` in `driver` dir. Or you can download phantoms from [here](http://phantomjs.org/download.html). Then rewrite the driver path in `settings.py`
-2. add your qq account in `config.json`
+1. If you want to download phantomjs driver yourself, you can download from [here](http://phantomjs.org/download.html). Unzip it and then write the abs path in `settings.py`.`phantomjs_driver_path`
+2. add your qq account and password in `config.json`
 3. copy 163 playlist url in `config.json`.wy_playlist_url
 4. input qq playlist name in `config.json`.qq_playlist_name
-5. run `python 163toQQ.py`
+5. run `python run.py`
 
 
 ## debug
 you can use chrome driver.
+1. Uncomment line 59 and line 64
+2. download chrome driver
+3. set driver path in `settings.py`
 
 ## enhancement
 1. sync music.qq to music.163.

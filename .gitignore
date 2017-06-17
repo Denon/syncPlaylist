@@ -107,4 +107,4 @@ ENV/
 driver
 
 # config
-config.py
+config.json

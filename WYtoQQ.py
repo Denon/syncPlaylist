@@ -56,7 +56,7 @@ config = Config()
 def init_browser():
     os.environ["webdriver.chrome.driver"] = chrome_driver_path
     os.environ["webdriver.phantomjs.driver"] = phantomjs_driver_path
-    chromedriver = chrome_driver_path
+    # chromedriver = chrome_driver_path
     phantomjs_driver = phantomjs_driver_path
 
     opts = Options()
@@ -92,7 +92,7 @@ def retry(retry_times=0, exc_class=Exception, notice_message=None):
 
 
 def get_qq_target_playlist():
-    browser.get('https://y.qq.com/portal/profile.html#sub=other&tab=create&')
+    browser.get(qq_playlist_url)
     wait.until(lambda browser: browser.find_element_by_class_name("playlist__list"))
     playlist = browser.find_element_by_class_name("playlist__list")
     playlist_items = playlist.find_elements_by_class_name('playlist__item')
@@ -107,6 +107,7 @@ def get_qq_target_playlist():
 
 
 def get_163_song_list():
+
     response = requests.get(config.wy_playlist_url, headers=headers)
     html = response.content
     soup = BeautifulSoup(html, "html.parser")
@@ -123,6 +124,7 @@ def get_163_song_list():
         song = song_detail[0]
         singer, album = song_detail[1].split('- ', 1)
         song_details.append((song, singer, album))
+    print "get 163 playlist success"
     return song_details
 
 
@@ -176,14 +178,14 @@ def login_qq():
     print "login sucess"
 
 
-if __name__ == '__main__':
+def main():
     try:
         song_list = get_163_song_list()
         login_qq()
         target_playlist_id = get_qq_target_playlist()
         for song in song_list:
             search_song(target_playlist_id, song[0], song[1])
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
     finally:
         print "total success:{}".format(len(success_list))
@@ -191,5 +193,9 @@ if __name__ == '__main__':
         pprint(failed_list)
         browser.service.process.send_signal(signal.SIGTERM)  # kill the specific phantomjs child proc
         browser.quit()
+
+
+if __name__ == '__main__':
+    main()
 
 

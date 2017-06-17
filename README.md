@@ -18,3 +18,7 @@ Sync music.163 playlist to music.qq
 
 ## debug
 you can use chrome driver.
+
+## enhancement
+1. sync music.qq to music.163.
+2. convert script to exe.

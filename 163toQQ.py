@@ -9,6 +9,8 @@ import traceback
 import signal
 import functools
 import requests
+import json
+from pprint import pprint
 from time import sleep
 from urllib import quote
 from bs4 import BeautifulSoup, Tag
@@ -17,27 +19,53 @@ from selenium.webdriver.support import ui
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 
-from config import *
+from settings import *
+
+success_list = list()
+failed_list = list()
 
 
-headers = {
-    "User-Agent": 'Mozilla/5.0 (Linux; U; Android 2.3.6; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.'
-}
+class Config(object):
+    def __init__(self):
+        with open("config.json", 'r') as f:
+            account_json = f.read()
+        self.config = json.loads(account_json)
 
-url = "http://music.163.com/playlist?id=31421765"
-search_url = "https://y.qq.com/portal/search.html#page=1&searchid=1&remoteplace=txt.yqq.top&t=song&w={}"
-target_playlist_name = 'test1'
+    @property
+    def qq_account(self):
+        return self.config["qq_account"]
+
+    @property
+    def qq_password(self):
+        return self.config["qq_password"]
+
+    @property
+    def wy_playlist_url(self):
+        playlist_id = self.config["wy_playlist_url"].split("id=")[-1]
+        url = "http://music.163.com/playlist?id={}"
+        return url.format(playlist_id)
+
+    @property
+    def qq_playlist_name(self):
+        return self.config["qq_playlist_name"]
 
 
-os.environ["webdriver.chrome.driver"] = "/Users/denon/Downloads/chromedriver"
-os.environ["webdriver.phantomjs.driver"] = phantomjs_driver_path
-chromedriver = "/Users/denon/Downloads/chromedriver"
-phantomjs_driver = phantomjs_driver_path
+config = Config()
 
-opts = Options()
-opts.add_argument("user-agent={}".format(headers["User-Agent"]))
-# browser = webdriver.Chrome(chromedriver)
-browser = webdriver.PhantomJS(phantomjs_driver)
+
+def init_browser():
+    os.environ["webdriver.chrome.driver"] = chrome_driver_path
+    os.environ["webdriver.phantomjs.driver"] = phantomjs_driver_path
+    chromedriver = chrome_driver_path
+    phantomjs_driver = phantomjs_driver_path
+
+    opts = Options()
+    opts.add_argument("user-agent={}".format(headers["User-Agent"]))
+    # browser = webdriver.Chrome(chromedriver)
+    browser = webdriver.PhantomJS(phantomjs_driver)
+    return browser
+
+browser = init_browser()
 wait = ui.WebDriverWait(browser, 5)
 
 
@@ -56,7 +84,8 @@ def retry(retry_times=0, exc_class=Exception, notice_message=None):
                 except exc_class as e:
                     if current >= retry_times:
                         raise RetryException()
-                    print notice_message
+                    if notice_message:
+                        print notice_message
                     current += 1
         return inner_wrapper
     return wrapper
@@ -71,12 +100,14 @@ def get_qq_target_playlist():
     for item in playlist_items:
         title = item.find_element_by_class_name('playlist__title').text
         item_id = item.get_attribute('data-dirid')
-        if title == target_playlist_name:
+        if title == config.qq_playlist_name:
             return item_id
+    else:
+        raise Exception("can not find qq playlist:{}, please check".format(config.qq_playlist_name))
 
 
 def get_163_song_list():
-    response = requests.get(url, headers=headers)
+    response = requests.get(config.wy_playlist_url, headers=headers)
     html = response.content
     soup = BeautifulSoup(html, "html.parser")
     details = soup.select("span[class='detail']")
@@ -96,7 +127,6 @@ def get_163_song_list():
 
 
 def search_song(playlist_id, song, singer):
-    print song
     search_word = "{} {}".format(song, singer)
     url_sw = quote(search_word)
     browser.get(search_url.format(url_sw))
@@ -108,7 +138,17 @@ def search_song(playlist_id, song, singer):
         browser.execute_script("document.getElementsByClassName('songlist__list')[0].firstElementChild.getElementsByClassName('list_menu__add')[0].click()")
         sleep(0.5)
         browser.find_element_by_css_selector("a[data-dirid='{}']".format(playlist_id)).click()
+        print "song:{} success".format(song)
         return
+
+    try:
+        _add()
+    except RetryException:
+        print "song:{}, sync error".format(song)
+        failed_list.append(search_word)
+        return
+    else:
+        success_list.append(search_word)
 
 
 @retry(retry_times=3, exc_class=NoSuchElementException, notice_message='login failed and retry')
@@ -122,9 +162,9 @@ def login_qq():
     sleep(0.5)
     browser.find_element_by_id("switcher_plogin").click()
     user_input = browser.find_element_by_id("u")
-    user_input.send_keys(qq_account.account)
+    user_input.send_keys(config.qq_account)
     pwd_input = browser.find_element_by_id("p")
-    pwd_input.send_keys(qq_account.password)
+    pwd_input.send_keys(config.qq_password)
     submit = browser.find_element_by_id("login_button")
     submit.click()
     sleep(1)
@@ -146,6 +186,9 @@ if __name__ == '__main__':
     except Exception as e:
         traceback.print_exc()
     finally:
+        print "total success:{}".format(len(success_list))
+        print "total failed:{}, detail:".format(len(failed_list))
+        pprint(failed_list)
         browser.service.process.send_signal(signal.SIGTERM)  # kill the specific phantomjs child proc
         browser.quit()
 

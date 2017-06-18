@@ -108,3 +108,6 @@ driver
 
 # config
 config.json
+
+# output
+output.txt

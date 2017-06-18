@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
-
 import os
 import traceback
 import signal
 import functools
 import requests
 import json
-from pprint import pprint
 from time import sleep
 from urllib import quote
 from bs4 import BeautifulSoup, Tag
@@ -20,6 +15,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 
 from settings import *
+from utils import _print
 
 success_list = list()
 failed_list = list()
@@ -129,7 +125,7 @@ def get_163_song_list():
 
 
 def search_song(playlist_id, song, singer):
-    search_word = "{} {}".format(song, singer)
+    search_word = u"{} {}".format(song, singer).encode('utf8')
     url_sw = quote(search_word)
     browser.get(search_url.format(url_sw))
     wait.until(lambda browser: browser.find_element_by_class_name("songlist__list"))
@@ -140,13 +136,13 @@ def search_song(playlist_id, song, singer):
         browser.execute_script("document.getElementsByClassName('songlist__list')[0].firstElementChild.getElementsByClassName('list_menu__add')[0].click()")
         sleep(0.5)
         browser.find_element_by_css_selector("a[data-dirid='{}']".format(playlist_id)).click()
-        print "song:{} success".format(song)
+        _print(u"song:{} success".format(song))
         return
 
     try:
         _add()
     except RetryException:
-        print "song:{}, sync error".format(song)
+        _print(u"song:{}, sync error".format(song))
         failed_list.append(search_word)
         return
     else:
@@ -190,7 +186,8 @@ def main():
     finally:
         print "total success:{}".format(len(success_list))
         print "total failed:{}, detail:".format(len(failed_list))
-        pprint(failed_list)
+        for failed in failed_list:
+            _print(failed)
         browser.service.process.send_signal(signal.SIGTERM)  # kill the specific phantomjs child proc
         browser.quit()
 

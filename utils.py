@@ -1,4 +1,5 @@
 import urllib2
+import platform
 
 download_url = {
     "Windows": "https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-windows.zip",
@@ -35,3 +36,7 @@ def unzip(zip_file, file_path):
     zip_ref = zipfile.ZipFile(zip_file, 'r')
     zip_ref.extractall(file_path)
     zip_ref.close()
+
+
+def _print(msg):
+    print msg.encode('utf8')

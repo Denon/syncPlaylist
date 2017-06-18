@@ -16,7 +16,7 @@ Sync music.163 playlist to music.qq
 ## Usage
 
 ### First
-Download phantomjs driver [here](http://phantomjs.org/download.html). Unzip it. So you can find driver in ./phantomjs-X.X.X/bin/phantomjs
+Download phantomjs driver [here](http://phantomjs.org/download.html). Unzip it. So you can find driver in `./phantomjs-X.X.X/bin/phantomjs`
 
 ### python script
 1. write the driver absolute path in `settings.py`.`phantomjs_driver_path`

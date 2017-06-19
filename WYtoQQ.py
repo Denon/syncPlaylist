@@ -37,9 +37,7 @@ class Config(object):
 
     @property
     def wy_playlist_url(self):
-        playlist_id = self.config["wy_playlist_url"].split("id=")[-1]
-        url = "http://music.163.com/playlist?id={}"
-        return url.format(playlist_id)
+        return self.config["wy_playlist_url"]
 
     @property
     def qq_playlist_name(self):
@@ -109,27 +107,29 @@ def get_163_song_list():
     soup = BeautifulSoup(html, "html.parser")
     details = soup.select("span[class='detail']")
     song_details = list()
-    for detail in details:
-        song_detail = list()
-        song_html_content = detail.contents
-        for c in song_html_content:
-            if isinstance(c, Tag):
-                text = c.text.replace('\n', '')
-                song_detail.append(text)
+    try:
+        for detail in details:
+            song_detail = list()
+            song_text = detail.text
+            song_detail = song_text.strip('\n').split('\n\n')
 
-        song = song_detail[0]
-        singer, album = song_detail[1].split('- ', 1)
-        song_details.append((song, singer, album))
-    print "get 163 playlist success"
-    return song_details
+            song = song_detail[0]
+            singer = song_detail[1].split('- ', 1)[0]
+            # don't use album yet
+            album = ''
+            song_details.append((song, singer.strip('\n'), album))
+        print "get 163 playlist success"
+        return song_details
+    except Exception as e:
+        print detail.text
 
 
 def search_song(playlist_id, song, singer):
-    search_word = u"{} {}".format(song, singer).encode('utf8')
-    url_sw = quote(search_word)
+    search_word = u"{} {}".format(song, singer)
+    url_sw = quote(search_word.encode('utf8'))
     browser.get(search_url.format(url_sw))
     wait.until(lambda browser: browser.find_element_by_class_name("songlist__list"))
-    sleep(1)
+    sleep(0.5)
 
     @retry(retry_times=3)
     def _add():

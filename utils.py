@@ -7,11 +7,11 @@ download_url = {
 }
 
 
-def download(current_os, file_path):
+def download(file_path):
     """get code from https://stackoverflow.com/questions/22676/how-do-i-download-a-file-over-http-using-python
     """
-    phantomjs_file = file_path + download_url[current_os].split('/')[-1]
-    u = urllib2.urlopen(download_url[current_os])
+    phantomjs_file = file_path + download_url[platform.system()].split('/')[-1]
+    u = urllib2.urlopen(download_url[platform.system()])
     f = open(phantomjs_file, 'wb')
     meta = u.info()
     file_size = int(meta.getheaders("Content-Length")[0])

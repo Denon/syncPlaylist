@@ -1,115 +1,47 @@
-# -*- coding: utf-8 -*-
-
-import os
-import traceback
-import signal
 import functools
-import requests
-import json
+import traceback
 from time import sleep
-from urllib import quote
-from bs4 import BeautifulSoup, Tag
-from selenium import webdriver
-from selenium.webdriver.support import ui
-from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import NoSuchElementException
-
+from base import BaseSpider
+import requests
+from bs4 import BeautifulSoup
 from settings import *
-from utils import _print
-
-success_list = list()
-failed_list = list()
+from urllib2 import quote
+from utils import _print, retry, RetryException
 
 
-class Config(object):
-    def __init__(self):
-        with open("config.json", 'r') as f:
-            account_json = f.read()
-        self.config = json.loads(account_json)
+class WYtoQQ(BaseSpider):
+    @retry(retry_times=3, notice_message="login failed and retry")
+    def prepare(self):
+        self.browser.get("https://y.qq.com")
+        self.browser.set_window_size(1920, 1080)
+        self.wait.until(lambda browser: browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/span/a[2]"))
+        self.browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/span/a[2]").click()
+        self.wait.until(lambda browser: browser.find_element_by_id("frame_tips"))
+        self.browser.switch_to.frame("frame_tips")
+        self.wait.until(lambda browser: browser.find_element_by_id("switcher_plogin"))
+        sleep(0.5)
+        self.browser.find_element_by_id("switcher_plogin").click()
+        user_input = self.browser.find_element_by_id("u")
+        user_input.send_keys(self.config.qq_account)
+        pwd_input = self.browser.find_element_by_id("p")
+        pwd_input.send_keys(self.config.qq_password)
+        submit = self.browser.find_element_by_id("login_button")
+        submit.click()
+        sleep(1)
+        self.browser.switch_to.default_content()
+        self.browser.refresh()
+        self.wait.until(lambda browser: browser.find_element_by_class_name("popup_user"))
+        user_info = self.browser.find_element_by_class_name("popup_user")
+        user_info.find_element_by_css_selector("*")
+        print "login sucess"
 
-    @property
-    def qq_account(self):
-        return self.config["qq_account"]
-
-    @property
-    def qq_password(self):
-        return self.config["qq_password"]
-
-    @property
-    def wy_playlist_url(self):
-        return self.config["wy_playlist_url"]
-
-    @property
-    def qq_playlist_name(self):
-        return self.config["qq_playlist_name"]
-
-
-config = Config()
-
-
-def init_browser():
-    os.environ["webdriver.chrome.driver"] = chrome_driver_path
-    os.environ["webdriver.phantomjs.driver"] = phantomjs_driver_path
-    # chromedriver = chrome_driver_path
-    phantomjs_driver = phantomjs_driver_path
-
-    opts = Options()
-    opts.add_argument("user-agent={}".format(headers["User-Agent"]))
-    # browser = webdriver.Chrome(chromedriver)
-    browser = webdriver.PhantomJS(phantomjs_driver)
-    return browser
-
-browser = init_browser()
-wait = ui.WebDriverWait(browser, 5)
-
-
-class RetryException(Exception):
-    pass
-
-
-def retry(retry_times=0, exc_class=Exception, notice_message=None):
-    def wrapper(f):
-        @functools.wraps(f)
-        def inner_wrapper(*args, **kwargs):
-            current = 0
-            while True:
-                try:
-                    return f(*args, **kwargs)
-                except exc_class as e:
-                    if current >= retry_times:
-                        raise RetryException()
-                    if notice_message:
-                        print notice_message
-                    current += 1
-        return inner_wrapper
-    return wrapper
-
-
-def get_qq_target_playlist():
-    browser.get(qq_playlist_url)
-    wait.until(lambda browser: browser.find_element_by_class_name("playlist__list"))
-    playlist = browser.find_element_by_class_name("playlist__list")
-    playlist_items = playlist.find_elements_by_class_name('playlist__item')
-
-    for item in playlist_items:
-        title = item.find_element_by_class_name('playlist__title').text
-        item_id = item.get_attribute('data-dirid')
-        if title == config.qq_playlist_name:
-            return item_id
-    else:
-        raise Exception("can not find qq playlist:{}, please check".format(config.qq_playlist_name))
-
-
-def get_163_song_list():
-
-    response = requests.get(config.wy_playlist_url, headers=headers)
-    html = response.content
-    soup = BeautifulSoup(html, "html.parser")
-    details = soup.select("span[class='detail']")
-    song_details = list()
-    try:
+    def get_source_playlist(self):
+        response = requests.get(self.config.wy_playlist_url, headers=headers)
+        html = response.content
+        soup = BeautifulSoup(html, "html.parser")
+        details = soup.select("span[class='detail']")
+        song_details = list()
         for detail in details:
-            song_detail = list()
             song_text = detail.text
             song_detail = song_text.strip('\n').split('\n\n')
 
@@ -119,80 +51,47 @@ def get_163_song_list():
             album = ''
             song_details.append((song, singer.strip('\n'), album))
         print "get 163 playlist success"
-        return song_details
-    except Exception as e:
-        print detail.text
+        self.source_playlist = song_details
 
+    def get_target_playlist(self):
+        self.browser.get(qq_playlist_url)
+        self.wait.until(lambda browser: browser.find_element_by_class_name("playlist__list"))
+        playlist = self.browser.find_element_by_class_name("playlist__list")
+        playlist_items = playlist.find_elements_by_class_name('playlist__item')
 
-def search_song(playlist_id, song, singer):
-    search_word = u"{} {}".format(song, singer)
-    url_sw = quote(search_word.encode('utf8'))
-    browser.get(search_url.format(url_sw))
-    wait.until(lambda browser: browser.find_element_by_class_name("songlist__list"))
-    sleep(0.5)
+        for item in playlist_items:
+            title = item.find_element_by_class_name('playlist__title').text
+            item_id = item.get_attribute('data-dirid')
+            if title == self.config.qq_playlist_name:
+                self.target_playlist_tag = item_id
+                return
+        else:
+            raise Exception("can not find qq playlist:{}, please check".format(self.config.qq_playlist_name))
 
-    @retry(retry_times=3)
-    def _add():
-        browser.execute_script("document.getElementsByClassName('songlist__list')[0].firstElementChild.getElementsByClassName('list_menu__add')[0].click()")
-        sleep(0.5)
-        browser.find_element_by_css_selector("a[data-dirid='{}']".format(playlist_id)).click()
-        _print(u"song:{} success".format(song))
-        return
+    def sync_song(self):
+        for song_detail in self.source_playlist:
+            song = song_detail[0]
+            singer = song_detail[1]
+            search_word = u"{} {}".format(song, singer)
+            url_sw = quote(search_word.encode('utf8'))
+            self.browser.get(search_url.format(url_sw))
+            self.wait.until(lambda browser: browser.find_element_by_class_name("songlist__list"))
+            sleep(0.5)
 
-    try:
-        _add()
-    except RetryException:
-        _print(u"song:{}, sync error".format(song))
-        failed_list.append(search_word)
-        return
-    else:
-        success_list.append(search_word)
+            @retry(retry_times=3)
+            def _add(browser):
+                browser.execute_script("document.getElementsByClassName('songlist__list')[0].firstElementChild.getElementsByClassName('list_menu__add')[0].click()")
+                sleep(0.5)
+                browser.find_element_by_css_selector("a[data-dirid='{}']".format(self.target_playlist_tag)).click()
+                _print(u"song:{} success".format(song))
 
-
-@retry(retry_times=3, exc_class=NoSuchElementException, notice_message='login failed and retry')
-def login_qq():
-    browser.get("https://y.qq.com")
-    wait.until(lambda browser: browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/span/a[2]"))
-    browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/span/a[2]").click()
-    wait.until(lambda browse: browser.find_element_by_id("frame_tips"))
-    browser.switch_to.frame("frame_tips")
-    wait.until(lambda browse: browser.find_element_by_id("switcher_plogin"))
-    sleep(0.5)
-    browser.find_element_by_id("switcher_plogin").click()
-    user_input = browser.find_element_by_id("u")
-    user_input.send_keys(config.qq_account)
-    pwd_input = browser.find_element_by_id("p")
-    pwd_input.send_keys(config.qq_password)
-    submit = browser.find_element_by_id("login_button")
-    submit.click()
-    sleep(1)
-    browser.switch_to.default_content()
-    browser.refresh()
-    wait.until(lambda browser: browser.find_element_by_class_name("popup_user"))
-    user_info = browser.find_element_by_class_name("popup_user")
-    user_info.find_element_by_css_selector("*")
-    print "login sucess"
-
-
-def main():
-    try:
-        song_list = get_163_song_list()
-        login_qq()
-        target_playlist_id = get_qq_target_playlist()
-        for song in song_list:
-            search_song(target_playlist_id, song[0], song[1])
-    except Exception:
-        traceback.print_exc()
-    finally:
-        print "total success:{}".format(len(success_list))
-        print "total failed:{}, detail:".format(len(failed_list))
-        for failed in failed_list:
-            _print(failed)
-        browser.service.process.send_signal(signal.SIGTERM)  # kill the specific phantomjs child proc
-        browser.quit()
-
+            try:
+                _add(self.browser)
+            except RetryException:
+                _print(u"song:{}, sync error".format(song))
+                self.failed_list.append(search_word)
+            else:
+                self.success_list.append(search_word)
 
 if __name__ == '__main__':
-    main()
-
-
+    WYtoQQ().run()

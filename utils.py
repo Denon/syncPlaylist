@@ -1,11 +1,36 @@
 import urllib2
 import platform
+import functools
+import traceback
 
 download_url = {
     "Windows": "https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-windows.zip",
     "Darwin": "https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-macosx.zip"
 }
 
+
+class RetryException(Exception):
+    pass
+
+
+def retry(retry_times=0, exc_class=Exception, notice_message=None, print_exc=False):
+    def wrapper(f):
+        @functools.wraps(f)
+        def inner_wrapper(*args, **kwargs):
+            current = 0
+            while True:
+                try:
+                    return f(*args, **kwargs)
+                except exc_class as e:
+                    if print_exc:
+                        traceback.print_exc()
+                    if current >= retry_times:
+                        raise RetryException()
+                    if notice_message:
+                        print notice_message
+                    current += 1
+        return inner_wrapper
+    return wrapper
 
 def download(file_path):
     """get code from https://stackoverflow.com/questions/22676/how-do-i-download-a-file-over-http-using-python

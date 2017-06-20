@@ -41,9 +41,11 @@ input account config
 > If you are not sure how to input the correct url config, please see the screenshot in dir `example`. Or you can email me.
 
 ### windows exe
-1. do #Step 1 and #Step 2 
-2. run `win32/run.exe`
-3. according the notice, input the driver absolute path.
+1. DO #step 1
+2. unzip win32.zip
+3. modify `win32/config.json` according #Step 2. It's better to visit http but not https, I don't know why it will raise IOError when visit https in windows console.
+4. run `win32/run.exe`
+5. according the notice, input the driver absolute path and chose sync mode.
 
 ---------------
 ## debug

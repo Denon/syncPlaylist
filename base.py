@@ -62,8 +62,8 @@ class BaseSpider(object):
 
         opts = Options()
         opts.add_argument("user-agent={}".format(headers["User-Agent"]))
-        browser = webdriver.Chrome(chromedriver)
-        # browser = webdriver.PhantomJS(phantomjs_driver)
+        # browser = webdriver.Chrome(chromedriver)
+        browser = webdriver.PhantomJS(phantomjs_driver)
         self.browser = browser
         self.wait = ui.WebDriverWait(self.browser, 5)
         self.config = Config()

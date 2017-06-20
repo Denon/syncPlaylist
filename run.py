@@ -27,3 +27,5 @@ if __name__ == '__main__':
     except Exception as e:
         print e
         raw_input("Error! press Enter to exit")
+    else:
+        raw_input("finish")

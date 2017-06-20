@@ -35,7 +35,7 @@ class QQtoWY(BaseSpider):
         print "login sucess"
 
     def get_source_playlist(self):
-        response = requests.get(self.config.qq_playlist_url, headers=headers)
+        response = requests.get(self.config.qq_playlist_url)
         html = response.content
         soup = BeautifulSoup(html, "html.parser")
         details = soup.find_all("div", class_="songlist__item")

@@ -111,3 +111,6 @@ config.json
 
 # output
 output.txt
+
+# mac
+.DS_Store

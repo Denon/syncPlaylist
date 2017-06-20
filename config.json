@@ -2,5 +2,9 @@
   "qq_account": "",
   "qq_password": "",
   "wy_playlist_url": "",
-  "qq_playlist_name": ""
+  "qq_playlist_name": "",
+  "wy_account": "",
+  "wy_password": "",
+  "qq_playlist_url": "",
+  "wy_user_playlist_url": ""
 }

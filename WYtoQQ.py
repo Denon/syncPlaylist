@@ -74,7 +74,7 @@ class WYtoQQ(BaseSpider):
             singer = song_detail[1]
             search_word = u"{} {}".format(song, singer)
             url_sw = quote(search_word.encode('utf8'))
-            self.browser.get(search_url.format(url_sw))
+            self.browser.get(qq_search_url.format(url_sw))
             self.wait.until(lambda browser: browser.find_element_by_class_name("songlist__list"))
             sleep(0.5)
 

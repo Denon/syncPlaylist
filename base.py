@@ -31,6 +31,22 @@ class Config(object):
     def qq_playlist_name(self):
         return self.config["qq_playlist_name"]
 
+    @property
+    def wy_account(self):
+        return self.config["wy_account"]
+
+    @property
+    def wy_password(self):
+        return self.config["wy_password"]
+
+    @property
+    def qq_playlist_url(self):
+        return self.config["qq_playlist_url"]
+
+    @property
+    def wy_user_playlist_url(self):
+        return self.config["wy_user_playlist_url"]
+
 
 class BaseSpider(object):
     def __init__(self):
@@ -41,13 +57,13 @@ class BaseSpider(object):
         self.failed_list = list()
         os.environ["webdriver.chrome.driver"] = chrome_driver_path
         os.environ["webdriver.phantomjs.driver"] = phantomjs_driver_path
-        # chromedriver = chrome_driver_path
+        chromedriver = chrome_driver_path
         phantomjs_driver = phantomjs_driver_path
 
         opts = Options()
         opts.add_argument("user-agent={}".format(headers["User-Agent"]))
-        # browser = webdriver.Chrome(chromedriver)
-        browser = webdriver.PhantomJS(phantomjs_driver)
+        browser = webdriver.Chrome(chromedriver)
+        # browser = webdriver.PhantomJS(phantomjs_driver)
         self.browser = browser
         self.wait = ui.WebDriverWait(self.browser, 5)
         self.config = Config()

@@ -2,6 +2,7 @@ import urllib2
 import platform
 import functools
 import traceback
+import re
 
 download_url = {
     "Windows": "https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-windows.zip",
@@ -31,6 +32,7 @@ def retry(retry_times=0, exc_class=Exception, notice_message=None, print_exc=Fal
                     current += 1
         return inner_wrapper
     return wrapper
+
 
 def download(file_path):
     """get code from https://stackoverflow.com/questions/22676/how-do-i-download-a-file-over-http-using-python
@@ -65,3 +67,8 @@ def unzip(zip_file, file_path):
 
 def _print(msg):
     print msg.encode('utf8')
+
+
+def clear_string(text):
+    regex = re.compile(r'[\n\r\t]')
+    return regex.sub('', text)

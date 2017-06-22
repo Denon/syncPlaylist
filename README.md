@@ -53,7 +53,3 @@ you can use chrome driver.
 1. Uncomment line 59 and line 64
 2. download chrome driver
 3. set driver path in `settings.py`
-
----------------
-## enhancement
-1. sync music.qq to music.163.

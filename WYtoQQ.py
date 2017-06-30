@@ -22,9 +22,9 @@ class WYtoQQ(BaseSpider):
         sleep(0.5)
         self.browser.find_element_by_id("switcher_plogin").click()
         user_input = self.browser.find_element_by_id("u")
-        user_input.send_keys(self.config.qq_account)
+        user_input.send_keys(self.config.account)
         pwd_input = self.browser.find_element_by_id("p")
-        pwd_input.send_keys(self.config.qq_password)
+        pwd_input.send_keys(self.config.password)
         submit = self.browser.find_element_by_id("login_button")
         submit.click()
         sleep(1)
@@ -36,7 +36,7 @@ class WYtoQQ(BaseSpider):
         print "login sucess"
 
     def get_source_playlist(self):
-        response = requests.get(self.config.wy_playlist_url, headers=headers)
+        response = requests.get(self.config.source_playlist_url.replace('#', 'm'), headers=headers)
         html = response.content
         soup = BeautifulSoup(html, "html.parser")
         details = soup.select("span[class='detail']")
@@ -54,19 +54,21 @@ class WYtoQQ(BaseSpider):
         self.source_playlist = song_details
 
     def get_target_playlist(self):
-        self.browser.get(qq_playlist_url)
-        self.wait.until(lambda browser: browser.find_element_by_class_name("playlist__list"))
-        playlist = self.browser.find_element_by_class_name("playlist__list")
-        playlist_items = playlist.find_elements_by_class_name('playlist__item')
-
-        for item in playlist_items:
-            title = item.find_element_by_class_name('playlist__title').text
-            item_id = item.get_attribute('data-dirid')
-            if title == self.config.qq_playlist_name:
-                self.target_playlist_tag = item_id
-                return
-        else:
-            raise Exception("can not find qq playlist:{}, please check".format(self.config.qq_playlist_name))
+        # self.browser.get(self.config.target_playlist_url)
+        # self.wait.until(lambda browser: browser.find_element_by_class_name("playlist__list"))
+        # playlist = self.browser.find_element_by_class_name("playlist__list")
+        # playlist_items = playlist.find_elements_by_class_name('playlist__item')
+        #
+        # for item in playlist_items:
+        #     title = item.find_element_by_class_name('playlist__title').text
+        #     item_id = item.get_attribute('data-dirid')
+        #     if title == self.config.qq_playlist_name:
+        #         self.target_playlist_tag = item_id
+        #         return
+        # else:
+        #     raise Exception("can not find qq playlist:{}, please check".format(self.config.qq_playlist_name))
+        self.target_playlist_tag = self.config.target_playlist_url.split('dirid=')[-1]
+        return
 
     def sync_song(self):
         for song_detail in self.source_playlist:

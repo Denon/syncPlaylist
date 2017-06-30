@@ -114,3 +114,6 @@ output.txt
 
 # mac
 .DS_Store
+
+# zip
+*.zip

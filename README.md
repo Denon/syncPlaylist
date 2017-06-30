@@ -15,11 +15,8 @@ Sync playlist between WY and QQ.
 ---------------
 ## Usage
 
-### Step 1: Download the driver
-Download phantomjs driver [here](http://phantomjs.org/download.html). Then put it in the project folder.
 
-
-### Step 2: set driver path and input config
+### Step 1: set driver path and input config
 input account config
 
 
@@ -34,7 +31,7 @@ input account config
 2. copy qq playlist url in `config.json`[source_playlist_url]
 3. input wy user playlist url in `config.json`[target_playlist_url]
 
-### Step 3:run script!
+### Step 2:run script!
 run `python run.py`
 
 > If you are not sure how to input the correct url config, please see the screenshot in dir `example`. Or you can email me.

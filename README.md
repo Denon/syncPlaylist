@@ -1,3 +1,8 @@
+# Attention
+NOT AVAILABLE NOW!!!
+
+WAIT FOR UPDATE PLZ!
+
 # syncPlaylist
 Sync playlist between WY and QQ.
 

@@ -17,8 +17,7 @@ Sync playlist between WY and QQ.
 
 
 ### Step 1: input config
-input account config in `config.json`.qq account or wy email account
-
+input config in `config.json`.
 
 * If you choose WY to QQ:
 1. add your qq account and password in `config.json`[account, password]
@@ -37,11 +36,10 @@ run `python run.py`
 > If you are not sure how to input the correct url config, please see the screenshot in dir `example`. Or you can email me.
 
 ### windows exe
-1. DO #step 1
-2. unzip win32.zip
-3. modify `win32/config.json` according #Step 2. It's better to visit http but not https, I don't know why it will raise IOError when visit https in windows console.
-4. run `win32/run.exe`
-5. according the notice, input the driver absolute path and chose sync mode.
+1. unzip win32.rar
+2. Input config in `win32/config.json` according step1
+3. run `win32/run.exe`
+4. according the notice, chose sync mode.
 
 ---------------
 ## debug

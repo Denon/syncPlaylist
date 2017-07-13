@@ -28,7 +28,7 @@ def retry(retry_times=0, exc_class=Exception, notice_message=None, print_exc=Fal
                     if current >= retry_times:
                         raise RetryException()
                     if notice_message:
-                        print notice_message
+                        print(notice_message)
                     current += 1
         return inner_wrapper
     return wrapper
@@ -42,7 +42,7 @@ def download(file_path):
     f = open(phantomjs_file, 'wb')
     meta = u.info()
     file_size = int(meta.getheaders("Content-Length")[0])
-    print "Downloading: %s Bytes: %s" % (phantomjs_file, file_size)
+    print("Downloading: %s Bytes: %s" % (phantomjs_file, file_size))
 
     file_size_dl = 0
     block_sz = 8192
@@ -53,7 +53,7 @@ def download(file_path):
         file_size_dl += len(buffer)
         f.write(buffer)
         status = "%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
-        print status
+        print(status)
     f.close()
     return phantomjs_file
 
@@ -66,7 +66,7 @@ def unzip(zip_file, file_path):
 
 
 def _print(msg):
-    print msg.encode('utf8')
+    print(msg.encode('utf8'))
 
 
 def clear_string(text):

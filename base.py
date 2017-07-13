@@ -65,8 +65,8 @@ class BaseSpider(object):
         pass
 
     def print_result(self):
-        print "total success:{}".format(len(self.success_list))
-        print "total failed:{}, detail:".format(len(self.failed_list))
+        print("total success:{}".format(len(self.success_list)))
+        print("total failed:{}, detail:".format(len(self.failed_list)))
         for failed in self.failed_list:
             _print(failed)
 

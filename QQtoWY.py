@@ -32,7 +32,7 @@ class QQtoWY(BaseSpider):
         element.send_keys(self.config.password)
         sleep(0.5)
         self.browser.execute_script("document.querySelectorAll('[data-action=\"login\"]')[6].click()")
-        print "login sucess"
+        print("login sucess")
 
     def get_source_playlist(self):
         response = requests.get(self.config.source_playlist_url)
@@ -44,7 +44,7 @@ class QQtoWY(BaseSpider):
             song = detail.select("span[class='songlist__songname_txt']")[0].text
             singer = detail.select("div[class='songlist__artist']")[0].text
             song_details.append((clear_string(song), clear_string(singer), ''))
-        print "get qq playlist success"
+        print("get qq playlist success")
         self.source_playlist = song_details
 
     def get_target_playlist(self):

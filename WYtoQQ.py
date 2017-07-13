@@ -34,7 +34,7 @@ class WYtoQQ(BaseSpider):
         self.wait.until(lambda browser: browser.find_element_by_class_name("popup_user"))
         user_info = self.browser.find_element_by_class_name("popup_user")
         user_info.find_element_by_css_selector("*")
-        print "login sucess"
+        print("login sucess")
 
     def get_source_playlist(self):
         url = self.config.source_playlist_url.replace('#', 'm')
@@ -64,7 +64,7 @@ class WYtoQQ(BaseSpider):
         #     # don't use album yet
         #     album = ''
         #     song_details.append((song, singer.strip('\n'), album))
-        print "get 163 playlist success"
+        print("get 163 playlist success")
         self.source_playlist = song_details
 
     def get_target_playlist(self):

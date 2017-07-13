@@ -9,7 +9,7 @@ download_url = {
     "Darwin": "https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-macosx.zip"  # Mac OS
 }
 driver_zip_file = {
-    "Windows": "phantomjs-2.1.1-macosx.zip",
+    "Windows": "phantomjs-2.1.1-windows.zip",
     "Darwin": "phantomjs-2.1.1-macosx.zip"
 }
 default_driver_path = {
@@ -27,8 +27,9 @@ if __name__ == '__main__':
                 raise Exception("Please Download driver first!!!")
             unzip(zip_file_path, 'driver')
         driver_path = default_driver_path[current_os]
-        st = os.stat(driver_path)
-        os.chmod(driver_path, st.st_mode | stat.S_IEXEC)
+        if current_os != "Windows":
+            st = os.stat(driver_path)
+            os.chmod(driver_path, st.st_mode | stat.S_IEXEC)
         settings.phantomjs_driver_path = driver_path
         mode = raw_input("Please select sync mode(1: from WY to QQ; 2: from QQ to WY)")
         if mode in ("1", 1):

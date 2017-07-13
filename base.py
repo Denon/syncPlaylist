@@ -16,36 +16,20 @@ class Config(object):
         self.config = json.loads(account_json)
 
     @property
-    def qq_account(self):
-        return self.config["qq_account"]
+    def account(self):
+        return self.config["account"]
 
     @property
-    def qq_password(self):
-        return self.config["qq_password"]
+    def password(self):
+        return self.config["password"]
 
     @property
-    def wy_playlist_url(self):
-        return self.config["wy_playlist_url"].replace('#', 'm')
+    def source_playlist_url(self):
+        return self.config["source_playlist_url"]
 
     @property
-    def qq_playlist_name(self):
-        return self.config["qq_playlist_name"]
-
-    @property
-    def wy_account(self):
-        return self.config["wy_account"]
-
-    @property
-    def wy_password(self):
-        return self.config["wy_password"]
-
-    @property
-    def qq_playlist_url(self):
-        return self.config["qq_playlist_url"]
-
-    @property
-    def wy_user_playlist_url(self):
-        return self.config["wy_user_playlist_url"]
+    def target_playlist_url(self):
+        return self.config["target_playlist_url"]
 
 
 class BaseSpider(object):
@@ -57,7 +41,7 @@ class BaseSpider(object):
         self.failed_list = list()
         os.environ["webdriver.chrome.driver"] = chrome_driver_path
         os.environ["webdriver.phantomjs.driver"] = phantomjs_driver_path
-        chromedriver = chrome_driver_path
+        # chromedriver = chrome_driver_path
         phantomjs_driver = phantomjs_driver_path
 
         opts = Options()

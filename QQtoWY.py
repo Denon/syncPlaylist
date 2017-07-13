@@ -26,16 +26,16 @@ class QQtoWY(BaseSpider):
         self.browser.execute_script("document.querySelectorAll('[data-type=\"netease\"]')[0].click()")
         sleep(0.5)
         element = self.browser.find_element_by_css_selector('input[class="js-input u-txt"]')
-        element.send_keys(self.config.wy_account)
+        element.send_keys(self.config.account)
         sleep(0.5)
         element = self.browser.find_element_by_css_selector('input[type=\"password\"]')
-        element.send_keys(self.config.wy_password)
+        element.send_keys(self.config.password)
         sleep(0.5)
         self.browser.execute_script("document.querySelectorAll('[data-action=\"login\"]')[6].click()")
         print "login sucess"
 
     def get_source_playlist(self):
-        response = requests.get(self.config.qq_playlist_url)
+        response = requests.get(self.config.source_playlist_url)
         html = response.content
         soup = BeautifulSoup(html, "html.parser")
         details = soup.find_all("div", class_="songlist__item")
@@ -48,7 +48,7 @@ class QQtoWY(BaseSpider):
         self.source_playlist = song_details
 
     def get_target_playlist(self):
-        self.target_playlist_tag = self.config.wy_user_playlist_url.split("playlist?id=")[-1]
+        self.target_playlist_tag = self.config.target_playlist_url.split("playlist?id=")[-1]
 
     def sync_song(self):
         for song_detail in self.source_playlist:

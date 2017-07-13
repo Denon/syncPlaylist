@@ -1,8 +1,3 @@
-# Attention
-NOT AVAILABLE NOW!!!
-
-WAIT FOR UPDATE PLZ!
-
 # syncPlaylist
 Sync playlist between WY and QQ.
 
@@ -21,8 +16,8 @@ Sync playlist between WY and QQ.
 ## Usage
 
 
-### Step 1: set driver path and input config
-input account config
+### Step 1: input config
+input account config in `config.json`.qq account or wy email account
 
 
 * If you choose WY to QQ:

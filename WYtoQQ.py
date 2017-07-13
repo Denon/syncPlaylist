@@ -1,11 +1,12 @@
-import functools
-import traceback
+import urlparse
 from time import sleep
 from base import BaseSpider
 import requests
 from bs4 import BeautifulSoup
 from settings import *
 from urllib2 import quote
+
+from api.wy import get_playlist_detail
 from utils import _print, retry, RetryException
 
 
@@ -36,20 +37,33 @@ class WYtoQQ(BaseSpider):
         print "login sucess"
 
     def get_source_playlist(self):
-        response = requests.get(self.config.source_playlist_url.replace('#', 'm'), headers=headers)
-        html = response.content
-        soup = BeautifulSoup(html, "html.parser")
-        details = soup.select("span[class='detail']")
+        url = self.config.source_playlist_url.replace('#', 'm')
+        parse_url = urlparse.urlparse(url)
+        playlist_id = urlparse.parse_qs(parse_url.query)["id"][0]
+        detail = get_playlist_detail(playlist_id)
+        song_list = detail['playlist']['tracks']
         song_details = list()
-        for detail in details:
-            song_text = detail.text
-            song_detail = song_text.strip('\n').split('\n\n')
-
-            song = song_detail[0]
-            singer = song_detail[1].split('- ', 1)[0]
-            # don't use album yet
+        for song in song_list:
+            ar_name = list()
+            song_name = song['name']
+            for ar in song['ar']:
+                ar_name.append(ar['name'])
             album = ''
-            song_details.append((song, singer.strip('\n'), album))
+            song_details.append((song_name, ' '.join(ar_name), album))
+        # response = requests.get(self.config.source_playlist_url.replace('#', 'm'), headers=headers)
+        # html = response.content
+        # soup = BeautifulSoup(html, "html.parser")
+        # details = soup.select("span[class='detail']")
+        # song_details = list()
+        # for detail in details:
+        #     song_text = detail.text
+        #     song_detail = song_text.strip('\n').split('\n\n')
+        #
+        #     song = song_detail[0]
+        #     singer = song_detail[1].split('- ', 1)[0]
+        #     # don't use album yet
+        #     album = ''
+        #     song_details.append((song, singer.strip('\n'), album))
         print "get 163 playlist success"
         self.source_playlist = song_details
 

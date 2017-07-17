@@ -66,7 +66,7 @@ def unzip(zip_file, file_path):
 
 
 def _print(msg):
-    print(msg.encode('utf8'))
+    print(msg.encode('utf8', errors='ignore'))
 
 
 def clear_string(text):

@@ -37,19 +37,29 @@ class WYtoQQ(BaseSpider):
         print "login sucess"
 
     def get_source_playlist(self):
-        url = self.config.source_playlist_url.replace('#', 'm')
-        parse_url = urlparse.urlparse(url)
-        playlist_id = urlparse.parse_qs(parse_url.query)["id"][0]
-        detail = get_playlist_detail(playlist_id)
-        song_list = detail['playlist']['tracks']
+        url = self.config.source_playlist_url
+        all_playlist_url = list()
+        for u in url:
+            all_playlist_url.append(u.replace('#', 'm'))
+
         song_details = list()
-        for song in song_list:
-            ar_name = list()
-            song_name = song['name']
-            for ar in song['ar']:
-                ar_name.append(ar['name'])
-            album = ''
-            song_details.append((song_name, ' '.join(ar_name), album))
+        song_ids = list()
+        for url in all_playlist_url:
+            parse_url = urlparse.urlparse(url)
+            playlist_id = urlparse.parse_qs(parse_url.query)["id"][0]
+            detail = get_playlist_detail(playlist_id)
+            song_list = detail['playlist']['tracks']
+            for song in song_list:
+                ar_name = list()
+                if song['id'] not in song_ids:
+                    song_ids.append(song['id'])
+                else:
+                    continue
+                song_name = song['name']
+                for ar in song['ar']:
+                    ar_name.append(ar['name'])
+                album = ''
+                song_details.append((song_name, ' '.join(ar_name), album))
         # response = requests.get(self.config.source_playlist_url.replace('#', 'm'), headers=headers)
         # html = response.content
         # soup = BeautifulSoup(html, "html.parser")
@@ -110,4 +120,4 @@ class WYtoQQ(BaseSpider):
                 self.success_list.append(search_word)
 
 if __name__ == '__main__':
-    WYtoQQ().run()
+    WYtoQQ().get_source_playlist()

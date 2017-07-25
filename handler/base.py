@@ -34,11 +34,14 @@ class Config(object):
 
 class BaseSpider(object):
     def __init__(self):
-        self.browse = None
+        self.browser = None
         self.source_playlist = None
         self.target_playlist_tag = None
         self.success_list = list()
         self.failed_list = list()
+        self.config = Config()
+
+    def init_browser(self):
         os.environ["webdriver.chrome.driver"] = chrome_driver_path
         os.environ["webdriver.phantomjs.driver"] = phantomjs_driver_path
         # chromedriver = chrome_driver_path
@@ -50,7 +53,6 @@ class BaseSpider(object):
         browser = webdriver.PhantomJS(phantomjs_driver)
         self.browser = browser
         self.wait = ui.WebDriverWait(self.browser, 5)
-        self.config = Config()
 
     def prepare(self):
         pass
@@ -73,6 +75,7 @@ class BaseSpider(object):
     def run(self):
         try:
             self.prepare()
+            self.init_browser()
             self.get_source_playlist()
             self.get_target_playlist()
             self.sync_song()

@@ -1,6 +1,6 @@
 {
   "account": "",
   "password": "",
-  "source_playlist_url": "",
+  "source_playlist_url": ["http://music.163.com/#/playlist?id=813841720"],
   "target_playlist_url": ""
 }

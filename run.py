@@ -1,7 +1,8 @@
-import platform
 import os
+import platform
 import stat
 import traceback
+
 from utils import unzip
 
 download_url = {
@@ -32,10 +33,10 @@ if __name__ == '__main__':
         settings.phantomjs_driver_path = driver_path
         mode = raw_input("Please select sync mode(1: from WY to QQ; 2: from QQ to WY)")
         if mode in ("1", 1):
-            from WYtoQQ import *
+            from handler.WYtoQQ import *
             WYtoQQ().run()
         elif mode in ("2", 2):
-            from QQtoWY import *
+            from handler.QQtoWY import *
             QQtoWY().run()
         else:
             raise Exception("Please select 1 or 2")

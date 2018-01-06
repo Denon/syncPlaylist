@@ -14,6 +14,17 @@ from Crypto.Cipher import AES
 modulus = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7'
 nonce = '0CoJUm6Qyw8W8jud'
 pubKey = '010001'
+header = {
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip,deflate,sdch',
+            'Accept-Language': 'zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4',
+            'Connection': 'keep-alive',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Host': 'music.163.com',
+            'Referer': 'http://music.163.com/search/',
+            'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36'  # NOQA
+        }
 
 
 def createSecretKey(size):
@@ -57,7 +68,7 @@ def get_playlist_detail(playlist_id):
         "csrf_token": ''
     }
     d = encrypted_request(req)
-    r = requests.post("http://music.163.com/weapi/v3/playlist/detail?csrf_token=", data=d)
+    r = requests.post("http://music.163.com/weapi/v3/playlist/detail?csrf_token=", data=d, headers=header)
     response = json.loads(r.text)
     return response
 

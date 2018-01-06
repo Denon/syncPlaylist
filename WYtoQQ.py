@@ -1,8 +1,7 @@
 import urlparse
+import re
 from time import sleep
 from base import BaseSpider
-import requests
-from bs4 import BeautifulSoup
 from settings import *
 from urllib2 import quote
 
@@ -37,9 +36,13 @@ class WYtoQQ(BaseSpider):
         print("login sucess")
 
     def get_source_playlist(self):
-        url = self.config.source_playlist_url.replace('#', 'm')
-        parse_url = urlparse.urlparse(url)
-        playlist_id = urlparse.parse_qs(parse_url.query)["id"][0]
+        pattern = re.compile(r'^.*id=(\d*)')
+        url = self.config.source_playlist_url
+        match = pattern.search(url)
+        if match:
+            playlist_id = match.groups()[0]
+        else:
+            raise Exception("can not find id, please check wy url!!!")
         detail = get_playlist_detail(playlist_id)
         song_list = detail['playlist']['tracks']
         song_details = list()

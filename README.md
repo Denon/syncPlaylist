@@ -1,5 +1,5 @@
 # syncPlaylist
-中文版本: `README_CN.md`
+[中文版本](./README_CN.md)
 Sync playlist between WY and QQ.
 
 ## platform
